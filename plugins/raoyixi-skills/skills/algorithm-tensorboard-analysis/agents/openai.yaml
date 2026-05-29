@@ -1,0 +1,4 @@
+interface:
+  display_name: "Algorithm Tensorboard Analysis"
+  short_description: "Help with Algorithm Tensorboard Analysis tasks"
+  default_prompt: "Use $algorithm-tensorboard-analysis to help with this task."

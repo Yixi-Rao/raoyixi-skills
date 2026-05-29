@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lpai Download"
+  short_description: "Help with Lpai Download tasks"
+  default_prompt: "Use $lpai-download to help with this task."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Marketplace Zxgc"
+  short_description: "Help with Marketplace Zxgc tasks"
+  default_prompt: "Use $marketplace-zxgc to help with this task."

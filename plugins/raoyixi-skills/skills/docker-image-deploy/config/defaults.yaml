@@ -1,0 +1,98 @@
+# 默认配置
+# 可通过 config/custom.yaml 覆盖
+
+harbor:
+  # Harbor 仓库地址
+  registry: reg-ai.chehejia.com
+
+  # 个人空间命名规则
+  namespace_template: "${LDAP_USERNAME}"
+
+  # 系统保留目录(不要推送)
+  reserved_paths:
+    - "notebook"
+
+docker:
+  # 默认镜像架构
+  default_platform: linux/amd64
+
+  # 超时设置(秒)
+  pull_timeout: 3600
+  push_timeout: 3600
+
+  # 并行传输层数
+  max_concurrent_downloads: 6
+  max_concurrent_uploads: 6
+
+colima:
+  # CPU 核心数
+  cpu: 2
+
+  # 内存大小(GB)
+  memory: 2
+
+  # 磁盘大小(GB)
+  disk: 100
+
+  # 架构
+  arch: aarch64  # ARM Mac
+
+  # 虚拟化类型(vz 或 qemu)
+  vm_type: vz
+
+  # 挂载类型
+  mount_type: virtiofs
+
+deployment:
+  # 工作目录
+  working_dir: ./deploy-workspace
+
+  # 部署记录文件名
+  record_filename: 部署记录.md
+
+  # 是否自动生成部署文档
+  auto_generate_doc: true
+
+  # 是否记录日志
+  enable_logging: true
+
+  # 日志文件路径
+  log_file: ~/.codex/skills/docker-image-deploy/deploy-history.log
+
+validation:
+  # 是否验证镜像 Digest
+  verify_digest: true
+
+  # 是否检查磁盘空间
+  check_disk_space: true
+
+  # 最小可用磁盘空间(GB)
+  min_free_space: 50
+
+tools:
+  # 必需工具列表
+  required:
+    - name: docker
+      check_command: "which docker"
+      install_command: "brew install docker"
+      description: "Docker 命令行工具"
+
+    - name: colima
+      check_command: "which colima"
+      install_command: "brew install colima"
+      description: "容器运行时环境"
+
+    - name: docker-buildx
+      check_command: "which docker-buildx"
+      install_command: "brew install docker-buildx"
+      description: "跨架构构建工具"
+
+progress:
+  # 是否显示进度报告
+  show_progress: true
+
+  # 进度报告间隔(秒)
+  report_interval: 60
+
+  # 是否使用 TodoWrite 跟踪任务
+  use_todo_tracking: true

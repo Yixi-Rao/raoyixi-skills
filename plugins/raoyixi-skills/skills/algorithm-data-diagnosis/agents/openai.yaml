@@ -1,0 +1,4 @@
+interface:
+  display_name: "Algorithm Data Diagnosis"
+  short_description: "Help with Algorithm Data Diagnosis tasks"
+  default_prompt: "Use $algorithm-data-diagnosis to help with this task."

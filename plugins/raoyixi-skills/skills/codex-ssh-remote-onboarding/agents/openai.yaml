@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex SSH Remote Onboarding"
+  short_description: "Onboard Codex SSH remotes"
+  default_prompt: "Use $codex-ssh-remote-onboarding to help with this task."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Read Paper"
+  short_description: "Help with Read Paper tasks"
+  default_prompt: "Use $read-paper to help with this task."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Remote Container"
+  short_description: "Help with Codex Remote Container tasks"
+  default_prompt: "Use $codex-remote-container to help with this task."

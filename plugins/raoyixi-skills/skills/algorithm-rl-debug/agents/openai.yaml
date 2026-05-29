@@ -1,0 +1,4 @@
+interface:
+  display_name: "Algorithm Rl Debug"
+  short_description: "Help with Algorithm Rl Debug tasks"
+  default_prompt: "Use $algorithm-rl-debug to help with this task."

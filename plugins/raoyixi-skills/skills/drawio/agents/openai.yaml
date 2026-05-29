@@ -1,0 +1,4 @@
+interface:
+  display_name: "Drawio"
+  short_description: "Help with Drawio tasks and workflows"
+  default_prompt: "Use $drawio to help with this task."

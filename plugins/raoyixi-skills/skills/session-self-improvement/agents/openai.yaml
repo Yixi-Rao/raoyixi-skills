@@ -1,0 +1,4 @@
+interface:
+  display_name: "Session Self Improvement"
+  short_description: "Help with Session Self Improvement tasks"
+  default_prompt: "Use $session-self-improvement to help with this task."

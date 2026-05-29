@@ -1,0 +1,4 @@
+interface:
+  display_name: "Algorithm Training Review"
+  short_description: "Help with Algorithm Training Review tasks"
+  default_prompt: "Use $algorithm-training-review to help with this task."

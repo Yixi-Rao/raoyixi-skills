@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Hook"
+  short_description: "Help with Codex Hook tasks"
+  default_prompt: "Use $codex-hook to help with this task."

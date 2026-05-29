@@ -1,0 +1,4 @@
+interface:
+  display_name: "Algorithm Eval Closure"
+  short_description: "Help with Algorithm Eval Closure tasks"
+  default_prompt: "Use $algorithm-eval-closure to help with this task."

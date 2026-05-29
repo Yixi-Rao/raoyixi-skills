@@ -1,0 +1,4 @@
+interface:
+  display_name: "Algorithm Training Debug"
+  short_description: "Help with Algorithm Training Debug tasks"
+  default_prompt: "Use $algorithm-training-debug to help with this task."

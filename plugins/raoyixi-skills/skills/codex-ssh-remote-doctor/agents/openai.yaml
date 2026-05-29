@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex SSH Remote Doctor"
+  short_description: "Diagnose Codex SSH remotes"
+  default_prompt: "Use $codex-ssh-remote-doctor to help with this task."

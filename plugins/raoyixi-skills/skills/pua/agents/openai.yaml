@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pua"
+  short_description: "Help with Pua tasks and workflows"
+  default_prompt: "Use $pua to help with this task."

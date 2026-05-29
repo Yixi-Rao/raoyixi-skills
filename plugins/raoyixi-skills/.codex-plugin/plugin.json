@@ -1,0 +1,36 @@
+{
+  "name": "raoyixi-skills",
+  "version": "0.1.0",
+  "description": "Personal Codex skills collected and adapted for reusable installation.",
+  "author": {
+    "name": "Yixi Rao",
+    "email": "kyrie.rao@gmail.com",
+    "url": "https://github.com/Yixi-Rao"
+  },
+  "homepage": "https://github.com/Yixi-Rao/raoyixi-skills",
+  "repository": "https://github.com/Yixi-Rao/raoyixi-skills",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "skills",
+    "workflow",
+    "automation"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Raoyixi Skills",
+    "shortDescription": "Personal Codex workflow skills.",
+    "longDescription": "Raoyixi Skills packages personal Codex skills for algorithm work, hook management, remote setup, diagrams, paper implementation, and operational workflows.",
+    "developerName": "Yixi Rao",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Use one of my packaged Codex skills for this task.",
+      "Help me diagnose a training or evaluation workflow.",
+      "Set up or repair a Codex SSH remote."
+    ]
+  }
+}

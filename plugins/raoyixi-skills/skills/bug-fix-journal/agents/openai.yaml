@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bug Fix Journal"
+  short_description: "Help with Bug Fix Journal tasks"
+  default_prompt: "Use $bug-fix-journal to help with this task."

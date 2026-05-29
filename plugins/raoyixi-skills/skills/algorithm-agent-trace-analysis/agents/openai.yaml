@@ -1,0 +1,4 @@
+interface:
+  display_name: "Algorithm Agent Trace Analysis"
+  short_description: "Help with Algorithm Agent Trace Analysis tasks"
+  default_prompt: "Use $algorithm-agent-trace-analysis to help with this task."

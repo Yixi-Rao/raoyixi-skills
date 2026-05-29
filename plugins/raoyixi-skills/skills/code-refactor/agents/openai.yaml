@@ -1,0 +1,4 @@
+interface:
+  display_name: "Code Refactor"
+  short_description: "Help with Code Refactor tasks"
+  default_prompt: "Use $code-refactor to help with this task."

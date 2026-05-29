@@ -1,0 +1,4 @@
+interface:
+  display_name: "Algorithm Eval Diagnosis"
+  short_description: "Help with Algorithm Eval Diagnosis tasks"
+  default_prompt: "Use $algorithm-eval-diagnosis to help with this task."

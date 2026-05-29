@@ -1,0 +1,4 @@
+interface:
+  display_name: "Algorithm Engineer Workflow"
+  short_description: "Help with Algorithm Engineer Workflow tasks"
+  default_prompt: "Use $algorithm-engineer-workflow to help with this task."

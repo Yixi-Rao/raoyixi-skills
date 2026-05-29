@@ -1,0 +1,4 @@
+interface:
+  display_name: "Docker Image Deploy"
+  short_description: "Help with Docker Image Deploy tasks"
+  default_prompt: "Use $docker-image-deploy to help with this task."

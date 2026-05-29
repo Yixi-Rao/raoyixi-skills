@@ -1,0 +1,4 @@
+interface:
+  display_name: "Self Improving Agent"
+  short_description: "Help with Self Improving Agent tasks"
+  default_prompt: "Use $self-improving-agent to help with this task."

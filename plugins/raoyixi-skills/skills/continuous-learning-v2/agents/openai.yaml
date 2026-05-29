@@ -1,0 +1,4 @@
+interface:
+  display_name: "Continuous Learning V2"
+  short_description: "Help with Continuous Learning V2 tasks"
+  default_prompt: "Use $continuous-learning-v2 to help with this task."
