@@ -6,10 +6,22 @@ Personal Codex skills packaged as a Codex plugin marketplace repository.
 
 ```bash
 git clone https://github.com/Yixi-Rao/raoyixi-skills.git
-codex plugin marketplace add /path/to/raoyixi-skills
+cd raoyixi-skills
+./install.sh
 ```
 
-Then install the `raoyixi-skills` plugin from Codex.
+The installer registers the local marketplace, copies the plugin into Codex's runtime plugin cache, and enables:
+
+```toml
+[plugins."raoyixi-skills@raoyixi-skills"]
+enabled = true
+```
+
+Restart Codex after installation. To verify from a shell:
+
+```bash
+codex debug prompt-input "list skills" | rg "raoyixi-skills:"
+```
 
 ## Contents
 
