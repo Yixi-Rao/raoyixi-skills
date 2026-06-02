@@ -1,0 +1,4 @@
+interface:
+  display_name: "VS Code Renderer Crash Debug"
+  short_description: "Debug VS Code renderer crash loops"
+  default_prompt: "Use $vscode-renderer-crash-debug to diagnose and fix a VS Code Remote-SSH renderer crash."
