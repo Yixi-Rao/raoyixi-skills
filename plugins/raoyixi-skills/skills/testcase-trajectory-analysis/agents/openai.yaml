@@ -1,0 +1,3 @@
+display_name: Testcase Trajectory Analysis
+short_description: Analyze one testcase RL rollout with reward recomputation and root-cause attribution.
+default_prompt: Analyze this testcase generation rollout trajectory and output one JSON item with reward explanation and root cause.
