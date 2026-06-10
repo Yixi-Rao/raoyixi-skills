@@ -23,11 +23,16 @@ Load these only when needed:
 1. Decide the diagram type and output format from the request.
 2. If a specific diagram type is named, consult `references/diagram-types.md` for the structural preset.
 3. If a named/default style preset is requested, consult `references/style-presets.md` before choosing colors, fonts, shapes, or edge styles.
-4. Generate valid draw.io XML in `mxGraphModel` format.
-5. Write the XML to a temporary `.xml` or `.drawio` file using `apply_patch`.
-6. Run `scripts/drawio_tool.py` to validate XML, write the final `.drawio`, and optionally export.
-7. If export succeeds, keep the `.drawio` source unless the user explicitly wants only the exported file.
-8. Return the absolute output path and mention if export was skipped because draw.io CLI is unavailable.
+4. Plan the composition before writing XML:
+   - Use an explicit layout grid such as left input/context, middle decision/bus, right lanes/cards.
+   - Decide node widths/heights from the longest labels first.
+   - Leave routing gutters between columns so arrows do not cross node interiors.
+5. Generate valid draw.io XML in `mxGraphModel` format.
+6. Write the XML to a temporary `.xml` or `.drawio` file using `apply_patch`.
+7. Run `scripts/drawio_tool.py` to validate XML, write the final `.drawio`, and optionally export.
+8. Run the layout quality checks in this skill before returning.
+9. If export succeeds, keep the `.drawio` source unless the user explicitly wants only the exported file.
+10. Return the absolute output path and mention if export was skipped because draw.io CLI is unavailable.
 
 Use descriptive lowercase hyphenated filenames, for example `login-flow.drawio` or `moe-rl-training-architecture.drawio.svg`.
 
@@ -108,15 +113,31 @@ Add all vertices and edges under `parent="1"`.
 Common vertex:
 
 ```xml
-<mxCell id="node-1" value="Label" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-  <mxGeometry x="80" y="80" width="180" height="70" as="geometry"/>
+<mxCell id="node-1" value="&lt;b&gt;Title&lt;/b&gt;&lt;br&gt;Line 1&lt;br&gt;Line 2" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;align=center;verticalAlign=middle;spacing=10;" vertex="1" parent="1">
+  <mxGeometry x="80" y="80" width="300" height="90" as="geometry"/>
 </mxCell>
 ```
 
 Common edge:
 
 ```xml
-<mxCell id="edge-1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="node-1" target="node-2">
+<mxCell id="edge-1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;endArrow=block;endFill=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="node-1" target="node-2">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+```
+
+Routing bus for one-to-many flow:
+
+```xml
+<mxCell id="bus-1" value="" style="rounded=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#7a869a;strokeColor=#7a869a;strokeWidth=1;" vertex="1" parent="1">
+  <mxGeometry x="420" y="120" width="4" height="700" as="geometry"/>
+</mxCell>
+```
+
+Connect from a real bus side, not from a zero-width line:
+
+```xml
+<mxCell id="edge-bus-node" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#7a869a;strokeWidth=2;endArrow=block;endFill=1;exitX=1;exitY=0.35;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="bus-1" target="node-1">
   <mxGeometry relative="1" as="geometry"/>
 </mxCell>
 ```
@@ -144,9 +165,29 @@ Database:
 - Do not put `--` inside XML comments.
 - Use stable unique IDs for every `mxCell`.
 - Prefer orthogonal connectors for flowcharts and architecture diagrams.
-- Keep labels short enough to fit; use `<br>` line breaks for dense labels.
+- Keep all visible text inside normal vertex labels. Do not create standalone text vertices for labels on top of cards.
+- Set `labelBackgroundColor=none` on visible text nodes so text never has a separate colored background.
+- Size every text-bearing node to fit its label. As a default, use at least `300x80` for multi-line cards and increase height for 4+ lines. Avoid tiny label boxes such as `300x19`, `180x20`, or any text-bearing node under `60px` high.
+- Use `<br>` line breaks for dense labels, and keep each line short enough to fit within the node width.
+- Anchor arrows to entity sides with `exitX/exitY` and `entryX/entryY`. For left-to-right flows, use `exitX=1;exitY=0.5` and `entryX=0;entryY=0.5`.
+- Do not let arrows overlap nodes or pass through node interiors. Reserve routing gutters between columns, or use explicit waypoints only when they improve clarity.
+- Do not use zero-width or zero-height visible routing objects. For a fan-out/fan-in bus, create a real narrow rectangle such as `width="4"` so edges have stable anchors; never use `shape=line` with `width="0"` as an edge source.
+- Put arrow endpoints on actual node borders or corners. Avoid floating endpoints, loose dots, or edges that appear to start in empty space.
+- Prefer a lane/grid composition for dense topology diagrams: left context/status, middle decision/root-cause lane, right evidence/action lanes. Keep nodes aligned by rows and use consistent spacing.
 - Use a restrained palette and consistent dimensions across related nodes.
 - For exported PNG/SVG/PDF that should remain editable in draw.io, rely on the script export path; it passes embedded-diagram flags where supported.
+
+## Layout Quality Checks
+
+Before finalizing a diagram, inspect the XML or run a small script to verify:
+
+- No text-bearing vertex uses `style="text;"` or `shape=text` unless the user explicitly asked for free-floating annotations.
+- No text-bearing vertex is smaller than its content. Flag nodes under `60px` high or obviously narrow widths for multi-line labels.
+- No layout helper used as an edge source has `width="0"` or `height="0"`.
+- All visible text styles include `labelBackgroundColor=none`.
+- Main flow edges have explicit side anchors (`exitX/exitY`, `entryX/entryY`).
+- One-to-many branches originate from a real bus/decision/node, not from empty space.
+- The rendered composition follows the planned grid/lane structure and has enough gutters between columns.
 
 ## Output Format
 
