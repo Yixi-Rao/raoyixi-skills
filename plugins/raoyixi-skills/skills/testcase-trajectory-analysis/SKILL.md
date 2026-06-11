@@ -151,12 +151,12 @@ Use this exact high-level structure. Keep field order when practical.
   },
   "first_failure_location": {
     "phase": "mock_design",
-    "step": "Step 6",
-    "explanation": "模型在该步生成了错误的 CMock Expect 调用，调用签名与 get_ceedling_mock_functions 输出不一致。"
+    "step": "Step 5",
+    "explanation": "模型在该步首次生成错误的 CMock Expect 调用，调用签名与 get_ceedling_mock_functions 输出不一致；Step 5 之前的项目分析和 mock 函数读取仍是正确且可复用的。"
   },
   "final_failure_reason": "compile_failure",
   "key_evidence": [
-    "Step 6 生成了 xxx_ExpectAndReturn(...)，但 get_ceedling_mock_functions 输出中不存在该签名。",
+    "Step 5 生成了 xxx_ExpectAndReturn(...)，但 get_ceedling_mock_functions 输出中不存在该签名。",
     "Step 7 编译报错指出 too few arguments to function xxx_ExpectAndReturn。",
     "Step 8-12 只反复调整 include 和局部变量，没有回到 CMock API 契约重新建模。"
   ],
@@ -184,8 +184,8 @@ Use this exact high-level structure. Keep field order when practical.
 - `root_cause_analysis.reason`: why that summary is the root cause.
 - `root_cause_analysis.not_terminal_reason`: why the final error is only a symptom, not the source cause.
 - `first_failure_location.phase`: coarse phase where the first real failure begins, such as `project_analysis`, `support_analysis`, `mock_design`, `test_generation`, `compile_fix_loop`, `coverage_improvement`, or `finalization`.
-- `first_failure_location.step`: concrete step number or log location.
-- `first_failure_location.explanation`: what went wrong in that step and why it caused later drift.
+- `first_failure_location.step`: the first concrete step that introduces the source error. Everything before this step should be considered correct/reusable for this rollout. If the wrong content is generated in Step 5 and written to disk in Step 6, record `Step 5`, not `Step 5/6` or `Step 6`.
+- `first_failure_location.explanation`: what wrong decision/content first appeared in that step, why earlier steps are still reusable, and why this step caused later drift.
 - `final_failure_reason`: final failure mode, such as `compile_failure`, `test_failure`, `coverage_insufficient`, `length_limit_exceeded`, or `tool_or_environment_error`.
 - `key_evidence`: concrete log facts proving the root cause. Include tool calls, compile errors, generated wrong code, repeated repair behavior, and success/failure divergence points.
 
