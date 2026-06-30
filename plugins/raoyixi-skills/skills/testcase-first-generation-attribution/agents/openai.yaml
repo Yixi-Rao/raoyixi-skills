@@ -1,0 +1,4 @@
+interface:
+  display_name: "Testcase First Generation Attribution"
+  short_description: "Attribution for failed first-pass testcase generation."
+  default_prompt: "Analyze why the first generated testcase failed and classify whether the root cause is prompt design, Step 1-5 analysis, or final code generation."
