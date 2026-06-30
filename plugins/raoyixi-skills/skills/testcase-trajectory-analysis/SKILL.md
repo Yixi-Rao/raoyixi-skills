@@ -167,7 +167,7 @@ Use this exact high-level structure. Keep field order when practical.
     "修复方向偏移",
     "最终失败或超长"
   ],
-  "sft_fix_direction_candidate": "补充 CMock API 契约建模正例，要求先读取 mock 函数签名，再生成 Expect/Ignore/Return 调用。",
+  "sft_fix_direction_candidate": "从 Step 5 重新修复：先回到 get_ceedling_mock_functions 输出，列出被测函数实际会触发的 CMock API；把 xxx_ExpectAndReturn(...) 改成日志中存在且参数完整的签名，必要时使用 xxx_Ignore()/xxx_IgnoreAndReturn(...) 降低调用次数约束；重新生成测试文件后立即编译验证，不要继续沿着后续 include 或局部变量错误打补丁。",
   "json_path": "...",
   "txt_path": "...",
   "token_stats_path": "..."
@@ -188,6 +188,7 @@ Use this exact high-level structure. Keep field order when practical.
 - `first_failure_location.explanation`: what wrong decision/content first appeared in that step, why earlier steps are still reusable, and why this step caused later drift.
 - `final_failure_reason`: final failure mode, such as `compile_failure`, `test_failure`, `coverage_insufficient`, `length_limit_exceeded`, or `tool_or_environment_error`.
 - `key_evidence`: concrete log facts proving the root cause. Include tool calls, compile errors, generated wrong code, repeated repair behavior, and success/failure divergence points.
+- `sft_fix_direction_candidate`: concrete repair advice for a human or AI coding agent to correct the first erroneous step. It must say where to rewind, which wrong decision or code to change, what evidence to reuse, and how to verify the fix. Do not write only dataset-level advice such as "add more SFT samples"; that belongs in a separate batch-level analysis.
 
 ## Manual Attribution Workflow
 
@@ -197,7 +198,12 @@ Use this exact high-level structure. Keep field order when practical.
 4. Identify the first real failure location. Do not automatically use the final error.
 5. Fill `root_cause_analysis` with one source root cause. Use secondary details in `failure_chain`, not as competing primary causes.
 6. Fill `key_evidence` with concrete proof from the log.
-7. Fill `sft_fix_direction_candidate` as an actionable data-improvement direction.
+7. Fill `sft_fix_direction_candidate` as a local repair plan for the trajectory:
+   - Start from `first_failure_location.step`, because earlier steps are reusable.
+   - State the concrete wrong assumption, tool call, mock contract, fixture state, oracle, or generated code to change.
+   - State which earlier evidence should be reused, such as function body, support files, mock function signatures, compile output, or sibling success behavior.
+   - State what a human or AI coding agent should do next, including the exact class of code edits or tool calls.
+   - State how to verify the correction, usually by rerunning `compile_ceedling_repo` and then coverage if tests pass.
 
 ## Saving Output
 
