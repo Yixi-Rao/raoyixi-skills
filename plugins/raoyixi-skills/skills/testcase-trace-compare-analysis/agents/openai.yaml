@@ -1,0 +1,4 @@
+interface:
+  display_name: "测试用例轨迹对比分析"
+  short_description: "逐步对比 baseline 与实验轨迹，定位 SFT 退化行为。"
+  default_prompt: "请对比两份测试用例生成 agent 轨迹，逐步拆解 baseline 与实验轨迹的行为差异，并输出 Markdown 分析报告。"
