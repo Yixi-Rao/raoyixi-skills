@@ -24,7 +24,7 @@ section "remote workspace"
 ssh -o ConnectTimeout=8 -o ClearAllForwardings=yes "$alias_name" "ls -ld '$workdir' '$workdir/.codex' '$workdir/.codex/cli' '$workdir/.codex/home' 2>/dev/null || true" || true
 
 section "remote codex"
-ssh -o ConnectTimeout=8 -o ClearAllForwardings=yes "$alias_name" 'command -v codex || true; codex --version 2>&1 || true; codex login status 2>&1 || true' || true
+ssh -o ConnectTimeout=8 -o ClearAllForwardings=yes "$alias_name" 'command -v codex || true; readlink -f "$(command -v codex)" 2>/dev/null || true; sed -n "1,40p" "$(command -v codex)" 2>/dev/null || true; codex --version 2>&1 || true; codex app-server daemon version 2>&1 || true; codex login status 2>&1 || true' || true
 
 section "remote config"
 ssh -o ConnectTimeout=8 -o ClearAllForwardings=yes "$alias_name" "sed -n '1,120p' '$workdir/.codex/home/config.toml' 2>/dev/null || true" || true
@@ -34,3 +34,6 @@ ssh -o ConnectTimeout=8 "$alias_name" "curl -I --proxy http://$remote_proxy --co
 
 section "doctor summary"
 ssh -o ConnectTimeout=8 "$alias_name" 'codex doctor --summary 2>/dev/null | sed -n "1,160p"' || true
+
+section "doctor updates"
+ssh -o ConnectTimeout=8 "$alias_name" 'codex doctor --summary 2>/dev/null | sed -n "/Updates/,/Connectivity/p"' || true

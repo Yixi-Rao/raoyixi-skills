@@ -1,4 +1,4 @@
 interface:
-  display_name: "Paper Implement"
-  short_description: "Help with Paper Implement tasks"
-  default_prompt: "Use $paper-implement to help with this task."
+  display_name: "Paper Implementation"
+  short_description: "Reproduce paper algorithms with gated validation"
+  default_prompt: "Use $paper-implement to reproduce a paper algorithm with a reviewed plan and three-layer validation."

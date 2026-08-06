@@ -65,6 +65,38 @@ ssh SOURCE_ALIAS "tar -C '$SOURCE_WORKDIR/.codex' -czf - cli" \
 
 This is useful for LPAI containers where VS Code provides `node` but not `npm`.
 
+## Check or Upgrade CLI Version
+
+Always show the currently effective CLI path and version before deciding that a remote is healthy:
+
+```bash
+ssh -o ConnectTimeout=8 -o ClearAllForwardings=yes "$SSH_ALIAS" \
+  'printf "%s\n" "---effective codex---"; command -v codex; readlink -f "$(command -v codex)" 2>/dev/null || true; codex --version; printf "%s\n" "---app-server---"; codex app-server daemon version 2>/dev/null || true; printf "%s\n" "---doctor updates---"; codex doctor --summary 2>/dev/null | sed -n "/Updates/,/Connectivity/p"'
+```
+
+If `codex doctor --summary` reports `updates ... available`, upgrade the active CLI before debugging higher layers. With npm:
+
+```bash
+ssh "$SSH_ALIAS" \
+  "mkdir -p '$CODEX_CLI_DIR' '$CODEX_HOME_DIR' && npm install -g --prefix '$CODEX_CLI_DIR' @openai/codex@latest && '$CODEX_CLI_DIR/bin/codex' --version"
+```
+
+If the remote uses a standalone tree such as `/lpai/.codex-ALIAS-home/packages/standalone/current`, install or copy the newer compatible Linux x64 standalone release under `packages/standalone/releases/<version>-x86_64-unknown-linux-musl`, then move the `current` symlink atomically:
+
+```bash
+ssh "$SSH_ALIAS" \
+  "ln -sfn '$CODEX_HOME_DIR/packages/standalone/releases/VERSION-x86_64-unknown-linux-musl' '$CODEX_HOME_DIR/packages/standalone/current' && '$CODEX_HOME_DIR/packages/standalone/current/bin/codex' --version"
+```
+
+After any CLI upgrade, confirm `/usr/local/bin/codex` executes the intended path. Rewrite the wrapper if it still points at an old CLI directory, then restart the app-server:
+
+```bash
+ssh -o ClearAllForwardings=yes "$SSH_ALIAS" \
+  'for pid in $(ps -eo pid,args | awk '\''/codex app-server|app-server proxy/ && !/awk/ {print $1}'\''); do kill "$pid" 2>/dev/null || true; done; rm -rf "$CODEX_HOME/app-server-control" "$CODEX_HOME/app-server-daemon" /root/.codex/app-server-control /root/.codex/app-server-daemon; codex --version; codex app-server daemon version 2>/dev/null || true'
+```
+
+Do not treat a version upgrade as complete until both `codex --version` and the live app-server version report the intended version, and a small `codex exec` request succeeds.
+
 ## Wrapper
 
 Write `/usr/local/bin/codex` on the remote:
@@ -150,6 +182,7 @@ Validate:
 
 ```bash
 ssh "$SSH_ALIAS" 'codex --version; codex login status'
+ssh "$SSH_ALIAS" 'codex app-server daemon version 2>/dev/null || true'
 ssh "$SSH_ALIAS" 'curl -I --proxy http://127.0.0.1:18080 --connect-timeout 8 https://api.openai.com 2>&1 | sed -n "1,30p"'
 ssh "$SSH_ALIAS" 'codex doctor --summary 2>/dev/null | sed -n "1,160p"'
 ssh "$SSH_ALIAS" "cd '$REMOTE_WORKDIR' && codex exec --skip-git-repo-check -C '$REMOTE_WORKDIR' 'Run pwd using shell and answer with the path only.'"
@@ -168,6 +201,7 @@ codex exec returns REMOTE_WORKDIR
 ## Troubleshooting
 
 - `codex: command not found`: restore `/usr/local/bin/codex` wrapper.
+- `codex doctor` shows `updates ... available`: upgrade the active CLI, rewrite stale wrappers if needed, kill app-server/proxy processes, and verify the live app-server version. A green SSH check with an old app-server can still fail newer Desktop protocol features.
 - `/usr/bin/env: node: No such file or directory`: add `/root/.vscode-server/bin/*`, `/lpai/.vscode-server/bin/*`, or `/root/.vscode-remote-containers/bin/*` to wrapper PATH.
 - `Not logged in`: copy local `~/.codex/auth.json` to both project home and `/root/.codex`.
 - `bwrap: Failed to make / slave`: set `sandbox_mode = "danger-full-access"` for a trusted remote.

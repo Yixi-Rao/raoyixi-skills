@@ -1,6 +1,6 @@
 ---
 name: paper-implement
-description: Reproduce machine learning or AI research papers inside a given training framework. Use when the user provides a paper PDF, paper excerpts, implementation notes, reproduction documents, or zero or more auxiliary docs, and asks Codex to implement the paper algorithm in an existing framework. The skill enforces deep source reading, PLAN.md first, user review before implementation, plan revision after feedback, strict implementation against the approved plan, static algorithm validation, and smoke test scripts.
+description: "Reproduce machine learning or AI research papers inside a given training framework. Use when the user provides a paper PDF, paper excerpts, implementation notes, reproduction documents, or auxiliary docs and asks Codex to implement the paper algorithm in an existing framework. Enforce deep source reading, PLAN.md first, user review before implementation, approved-plan changes only, and three-layer validation: formula unit/fuzz tests, framework integration tests, and default-off no-side-effect invariants."
 ---
 
 # Paper Implement
@@ -18,6 +18,7 @@ The workflow is intentionally gated: first read, then plan, then get user approv
 - Do not implement before the user approves the plan.
 - If implementation reveals an unexpected issue not covered by the approved plan, stop broad implementation and create a new plan document describing the issue, options, risks, and recommended resolution.
 - Keep changes scoped to the paper reproduction and the target training framework.
+- Treat a full training run as experimental evaluation, not as a substitute for formula, integration, or compatibility verification.
 
 ## Inputs
 
@@ -209,15 +210,35 @@ Include:
 ## 9. 验证计划
 
 Include:
-- static algorithm validation scan
-- import validation
-- config validation
-- tiny data smoke test
-- tiny model or mocked model smoke test
-- single-step loss/reward sanity check
-- short training run
-- expected outputs
-- failure diagnostics
+- formula unit and fuzz-test matrix
+- framework integration-test matrix
+- default-off no-side-effect invariants
+- import/config validation and a tiny-batch smoke test
+- expected outputs, tolerances, and failure diagnostics
+
+Also include a dedicated subsection:
+
+### 三层可证伪验证
+
+#### 1. 算法核心公式：单元测试与模糊测试
+- Map every distinctive paper formula to the target function, its inputs/outputs, and an independent test-side reference calculation. Do not derive expected values from the implementation under test.
+- Define deterministic fixtures: normal, boundary, degenerate, and invalid inputs. Cover thresholds, clipping, masks, padding, empty valid tokens, shapes, dtypes/devices, NaN/Inf, and algorithm-specific conditions such as ratio=1 or unit weights.
+- Compute expected values from the formula, then compare the training-framework function output to them with a stated tolerance. Include official examples, golden fixtures, or parity checks when available.
+- Add fuzz tests that vary shapes, mask layouts, numerical ranges, and relevant config combinations. Preserve a seed and a minimized failing case for every failure.
+- State the failure oracle: report the formula term, fixture or fuzz seed, expected value, actual value, and the first divergent tensor/index.
+
+#### 2. 训练框架集成测试
+- Test the reproduced module together with its real framework seams: upstream data loader/rollout/logprobs/rewards/advantages/masks and downstream trainer/loss aggregation/backward/optimizer/logging/checkpoint paths.
+- Define the contract at each seam: field names, shape, dtype, device, batch/sequence semantics, mutability, and distributed assumptions.
+- Run a minimal end-to-end training closure using a real or controlled mini batch: data preparation → forward → new algorithm module → loss → backward → optimizer step → metrics → checkpoint save/load.
+- Cover the framework modes that the plan claims to support, such as single/multi-GPU, mixed precision, gradient accumulation, and resume training. Verify that the algorithm switch reaches the real training path.
+
+#### 3. 副作用不变量检查
+- With the reproduced method disabled, compare the original framework and new code on identical model weights, batch, rollout, seed, and config. Old outputs must remain identical or within a stated tolerance.
+- Compare at least the old loss/reward/KL/entropy, masks and valid-token counts, key intermediate tensors, gradients, optimizer-step parameters/state, and existing metric meanings.
+- Verify that the new method does not silently mutate original input tensors/files, existing configs, data schemas, checkpoint formats, launch behavior, or old training/evaluation paths.
+- Add enabled-path degeneracy tests whenever the formula permits it. For example, ratio=1 should recover the original online PG/GRPO behavior; identical replay and online routing should add no difference.
+- Record the fixture, command, tolerance, maximum observed difference, and failure attribution for every invariant.
 ```
 
 ## Phase 3: User Review Gate
@@ -266,28 +287,33 @@ If a previously unknown problem appears:
    - recommendation
 4. Ask the user before continuing.
 
-## Phase 5: Static Error Validation
+## Phase 5: Three-Layer Validation
 
-Before claiming completion, perform a static validation scan of the reproduced algorithm.
+Before claiming completion, execute the three layers below. Passing a long training run does not replace any of them.
 
-Check at minimum:
+### 5.1 Formula Unit and Fuzz Tests
 
-- equation-to-code correspondence
-- tensor shapes
-- dtype/device placement
-- gradient flow
-- detach/no-grad boundaries
-- distributed synchronization assumptions
-- config defaults
-- imports
-- optional dependency handling
-- data field names
-- missing masks
-- numerical stability
-- checkpoint save/load compatibility
-- logging correctness
+1. Build an independent reference calculation for every distinctive algorithm formula.
+2. Turn representative formula inputs and expected outputs into unit tests for the reproduced framework function.
+3. Cover normal, boundary, degenerate, and invalid cases; include algorithm-specific null/identity cases and tensor-contract checks.
+4. Add seeded fuzz tests across shapes, masks, numeric ranges, and relevant config combinations.
+5. On failure, retain a reproducible fixture or seed and report expected/actual values plus the divergent formula term.
 
-Report any remaining uncertainty explicitly.
+### 5.2 Training-Framework Integration Tests
+
+1. Exercise the reproduced module with its actual upstream and downstream framework modules.
+2. Verify field contracts, tensor semantics, gradient flow, config propagation, logging, checkpointing, and relevant distributed assumptions at each seam.
+3. Run a minimal training closure through data preparation, forward, loss, backward, optimizer step, metrics, and checkpoint save/load.
+4. Cover every runtime mode claimed in the plan; do not claim untested modes as supported.
+
+### 5.3 No-Side-Effect Invariants
+
+1. With the algorithm disabled, compare new code against the original framework using identical weights, inputs, rollout, seed, and config.
+2. Require old outputs, metrics, gradients, and optimizer behavior to remain identical or within an explicit floating-point tolerance.
+3. Verify that inputs, old configs, metric meanings, data schemas, checkpoints, launchers, and old training/evaluation paths are not silently changed.
+4. Test enabled-path identity cases that should reduce to the baseline whenever the formula defines one.
+
+Report commands, fixtures, seeds, tolerances, maximum differences, failures, and remaining uncertainty explicitly.
 
 ## Phase 6: Smoke Test
 
@@ -300,7 +326,9 @@ The smoke test should verify:
 - algorithm switch enables correctly
 - a tiny batch can run
 - loss/reward/metric values are finite
-- backward compatibility path still runs when the algorithm is disabled
+- at least one formula unit test and one seeded fuzz case pass
+- one framework integration closure reaches optimizer step and checkpoint save/load
+- the disabled path and one enabled-path identity case satisfy the planned invariants
 
 Prefer a script such as:
 

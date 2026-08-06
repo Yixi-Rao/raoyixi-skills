@@ -27,10 +27,8 @@ Use this skill to debug VS Code window crashes from evidence, not guesses. Treat
 Run:
 
 ```bash
-python3 <skill-dir>/scripts/collect_vscode_crash_evidence.py --since "YYYY-MM-DD HH:MM:SS"
+python3 ~/.codex/skills/vscode-renderer-crash-debug/scripts/collect_vscode_crash_evidence.py --since "YYYY-MM-DD HH:MM:SS"
 ```
-
-Resolve `<skill-dir>` to the directory containing this `SKILL.md`.
 
 Read the output in this order:
 

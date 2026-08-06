@@ -25,13 +25,20 @@ Use the source SSH alias and remote workspace the user provides. If the user use
    - If npm exists, install with `npm install -g --prefix {workdir}/.codex/cli @openai/codex`.
    - If npm is absent but a compatible Linux x64 CLI exists on another trusted remote, copy the project-local CLI tree.
    - Write `/usr/local/bin/codex` as a wrapper that sets `CODEX_HOME`, proxy env vars, and finds a bundled VS Code `node` if `node` is absent from PATH.
-5. Configure auth and permissions:
+5. Check and upgrade the remote Codex CLI when the effective version is stale:
+   - Always report the effective wrapper path, `codex --version`, `codex app-server daemon version`, and the `Updates` or `updates` lines from `codex doctor --summary`.
+   - If doctor says a newer CLI is available, upgrade the active project-local CLI or standalone release before deeper debugging. Do not leave the remote on an old CLI unless the user explicitly asks to pin it.
+   - Prefer `npm install -g --prefix {workdir}/.codex/cli @openai/codex@latest` when npm is available; otherwise copy a newer compatible Linux x64 standalone or CLI tree from another trusted remote.
+   - After upgrade, rewrite `/usr/local/bin/codex` if needed so it executes the new active CLI path, then kill stale `codex app-server` and `app-server proxy` processes and remove stale app-server control directories.
+   - Validate that `codex --version`, `codex doctor --summary`, and the live app-server version all show the intended CLI version before testing the user workload.
+6. Configure auth and permissions:
    - Copy local `~/.codex/auth.json` to `{workdir}/.codex/home/auth.json` and `/root/.codex/auth.json`; never print file contents.
    - Set both files to mode `600`.
    - Write `config.toml` with `approval_policy = "never"`, `sandbox_mode = "danger-full-access"`, `features.network_proxy = true`, and trusted project entries.
-6. Restart stale remote app-server/proxy processes and remove stale app-server control directories when needed.
-7. Validate in this order:
+7. Restart stale remote app-server/proxy processes and remove stale app-server control directories when needed.
+8. Validate in this order:
    - `codex --version`
+   - `codex app-server daemon version`
    - `codex login status`
    - proxy curl through `127.0.0.1:18080`
    - `codex doctor --summary`
@@ -44,6 +51,7 @@ Use the source SSH alias and remote workspace the user provides. If the user use
 - A warning like `remote port forwarding failed for listen port 18080` can be harmless when another live SSH/Codex connection already owns the remote forwarded port. Verify with proxy curl or `codex exec` before treating it as fatal.
 - If `codex doctor` fails connectivity under `ClearAllForwardings=yes`, rerun without that option.
 - Existing Codex App tasks may retain old approval settings. New sessions read the updated `config.toml`.
+- Existing Codex App tasks may retain old CLI binaries until their app-server/proxy processes are killed. If `codex --version` changed but the App still reports an old version, kill remote `codex app-server` and `app-server proxy` processes and remove the active `app-server-control` directory.
 - `Error: path must be shorter than SUN_LEN` means the app-server Unix socket path is too long. Move `CODEX_HOME` to a short directory while keeping `-C {workdir}` pointed at the real repo.
 - If HTTPS curl through the proxy works but `codex doctor` reports WebSocket failures or App shows reconnects, enable `[features] network_proxy = true`.
 
