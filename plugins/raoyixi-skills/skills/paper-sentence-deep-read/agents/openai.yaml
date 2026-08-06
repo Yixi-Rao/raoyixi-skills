@@ -1,0 +1,4 @@
+interface:
+  display_name: "Paper Sentence Deep Read"
+  short_description: "逐句翻译并研究者级解读 AI 论文"
+  default_prompt: "Use $paper-sentence-deep-read to read this paper link sentence by sentence and write the Markdown result to my specified folder."

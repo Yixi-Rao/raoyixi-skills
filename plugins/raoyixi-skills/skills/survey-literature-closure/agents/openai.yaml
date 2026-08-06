@@ -1,0 +1,4 @@
+interface:
+  display_name: "文献闭包调研"
+  short_description: "以原文证据执行可恢复的双向引用闭包调研并生成完整可审计结果"
+  default_prompt: "使用 $survey-literature-closure 围绕指定题材完成范围定义、原文取证、双向引用闭包和可审计结果交付。"

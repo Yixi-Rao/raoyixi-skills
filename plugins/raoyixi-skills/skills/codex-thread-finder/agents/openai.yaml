@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Thread Finder"
+  short_description: "Find the most active Codex thread across local and SSH"
+  default_prompt: "Use $codex-thread-finder to find the most active Codex conversation in a time range."
